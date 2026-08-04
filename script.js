@@ -61,7 +61,7 @@
     navbar.classList.toggle('solid', currentTop > 60);
     navbar.classList.toggle(
       'nav-hidden',
-      scrollingDown && currentTop > 120 && !document.body.classList.contains('menu-open')
+      scrollingDown && currentTop > 120
     );
     toTop.classList.toggle('show', currentTop > 700);
     lastScrollTop = currentTop;
@@ -69,23 +69,6 @@
   document.addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
   onScroll();
   toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-  /* ---------- Mobile nav ---------- */
-  const navToggle = document.querySelector('.nav-toggle');
-  const navLinks = document.querySelector('.nav-links');
-  navToggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    navToggle.classList.toggle('active', isOpen);
-    document.body.classList.toggle('menu-open', isOpen);
-    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    navbar.classList.remove('nav-hidden');
-  });
-  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    navToggle.classList.remove('active');
-    navLinks.classList.remove('open');
-    document.body.classList.remove('menu-open');
-    navToggle.setAttribute('aria-expanded', 'false');
-  }));
 
   /* ---------- Hero parallax ---------- */
   const heroBg = document.querySelector('.hero-bg');
