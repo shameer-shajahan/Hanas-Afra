@@ -74,10 +74,10 @@
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
   navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navLinks.classList.toggle('open');
-    document.body.classList.toggle('menu-open');
-    navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open') ? 'true' : 'false');
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.classList.toggle('active', isOpen);
+    document.body.classList.toggle('menu-open', isOpen);
+    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     navbar.classList.remove('nav-hidden');
   });
   navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
