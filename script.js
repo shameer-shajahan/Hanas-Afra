@@ -57,12 +57,13 @@
     const currentTop = Math.max(0, h.scrollTop);
     const pct = maxScroll > 0 ? (currentTop / maxScroll) * 100 : 0;
     const scrollingDown = currentTop > lastScrollTop;
+    const scrollingUp = currentTop < lastScrollTop;
     progress.style.width = pct + '%';
     navbar.classList.toggle('solid', currentTop > 60);
-    navbar.classList.toggle(
-      'nav-hidden',
-      scrollingDown && currentTop > 120 && !navbar.classList.contains('menu-open')
-    );
+    if (!navbar.classList.contains('menu-open')) {
+      if (currentTop < 100 || scrollingDown) navbar.classList.add('nav-hidden');
+      if (scrollingUp && currentTop >= 100) navbar.classList.remove('nav-hidden');
+    }
     toTop.classList.toggle('show', currentTop > 700);
     lastScrollTop = currentTop;
   };
