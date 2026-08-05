@@ -239,29 +239,43 @@
     bgm.volume = 0.55;
     bgm.muted = false;
 
-    const tryPlay = async () => {
+    const stopUnlockListeners = () => {
+      INTERACTIONS.forEach(ev => {
+        document.removeEventListener(ev, unlockOnInteraction, true);
+        window.removeEventListener(ev, unlockOnInteraction, true);
+      });
+      window.removeEventListener('scroll', unlockOnInteraction, true);
+    };
+
+    const tryPlay = () => {
+      bgm.muted = false;
+      bgm.volume = 0.55;
+      if (bgm.readyState === 0) bgm.load();
       try {
-        await bgm.play();
-        return true;
+        const playPromise = bgm.play();
+        if (playPromise?.then) {
+          playPromise.then(stopUnlockListeners).catch(() => {});
+        } else {
+          stopUnlockListeners();
+        }
       } catch {
         return false;
       }
     };
 
-    const unlockOnInteraction = async () => {
-      if (bgm.paused) await tryPlay();
-      if (!bgm.paused) {
-        INTERACTIONS.forEach(ev => document.removeEventListener(ev, unlockOnInteraction));
-        window.removeEventListener('scroll', unlockOnInteraction);
-      }
+    function unlockOnInteraction() {
+      if (bgm.paused) tryPlay();
     };
 
-    const INTERACTIONS = ['touchstart', 'pointerdown', 'mousedown', 'keydown', 'wheel'];
+    const INTERACTIONS = ['click', 'touchstart', 'touchend', 'touchmove', 'pointerdown', 'pointerup', 'mousedown', 'keydown', 'wheel'];
     tryPlay();
     window.addEventListener('load', tryPlay);
     setTimeout(tryPlay, 500);
-    window.addEventListener('scroll', unlockOnInteraction, { passive: true });
-    INTERACTIONS.forEach(ev => document.addEventListener(ev, unlockOnInteraction, { passive: true }));
+    window.addEventListener('scroll', unlockOnInteraction, true);
+    INTERACTIONS.forEach(ev => {
+      document.addEventListener(ev, unlockOnInteraction, { capture: true, passive: true });
+      window.addEventListener(ev, unlockOnInteraction, { capture: true, passive: true });
+    });
   }
 
   /* ---------- Scroll-linked tilt (couple portrait only — rotating the gallery's
