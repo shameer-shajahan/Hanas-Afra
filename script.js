@@ -236,8 +236,13 @@
   /* ---------- Background music ---------- */
   const bgm = document.getElementById('bgm');
   if (bgm) {
+    const audioWelcome = document.querySelector('.audio-welcome');
     bgm.volume = 0.55;
     bgm.muted = false;
+
+    const hideAudioWelcome = () => {
+      audioWelcome?.classList.add('hide');
+    };
 
     const stopUnlockListeners = () => {
       INTERACTIONS.forEach(ev => {
@@ -245,6 +250,9 @@
         window.removeEventListener(ev, unlockOnInteraction, true);
       });
       window.removeEventListener('scroll', unlockOnInteraction, true);
+      audioWelcome?.removeEventListener('click', unlockOnInteraction);
+      audioWelcome?.removeEventListener('keydown', unlockOnWelcomeKey);
+      hideAudioWelcome();
     };
 
     const tryPlay = () => {
@@ -267,10 +275,20 @@
       if (bgm.paused) tryPlay();
     };
 
+    function unlockOnWelcomeKey(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        unlockOnInteraction();
+      }
+    }
+
     const INTERACTIONS = ['click', 'touchstart', 'touchend', 'touchmove', 'pointerdown', 'pointerup', 'mousedown', 'keydown', 'wheel'];
     tryPlay();
     window.addEventListener('load', tryPlay);
     setTimeout(tryPlay, 500);
+    bgm.addEventListener('play', hideAudioWelcome);
+    audioWelcome?.addEventListener('click', unlockOnInteraction);
+    audioWelcome?.addEventListener('keydown', unlockOnWelcomeKey);
     window.addEventListener('scroll', unlockOnInteraction, true);
     INTERACTIONS.forEach(ev => {
       document.addEventListener(ev, unlockOnInteraction, { capture: true, passive: true });
