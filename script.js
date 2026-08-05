@@ -236,60 +236,32 @@
   /* ---------- Background music ---------- */
   const bgm = document.getElementById('bgm');
   if (bgm) {
-    const musicToggle = document.querySelector('.music-toggle');
-    const musicStatus = musicToggle?.querySelector('.music-status');
     bgm.volume = 0.55;
     bgm.muted = false;
 
-    const setMusicState = (state) => {
-      if (!musicToggle) return;
-      const isPlaying = state === 'playing';
-      musicToggle.classList.toggle('is-playing', isPlaying);
-      musicToggle.classList.toggle('needs-action', state === 'blocked');
-      musicToggle.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
-      musicToggle.setAttribute('aria-label', isPlaying ? 'Pause music' : 'Play music');
-      if (musicStatus) {
-        musicStatus.textContent = state === 'blocked' ? 'Tap to play song' : isPlaying ? 'Music playing' : 'Play song';
-      }
-    };
-
-    const tryPlay = async (showBlocked = false) => {
+    const tryPlay = async () => {
       try {
         await bgm.play();
-        setMusicState('playing');
         return true;
       } catch {
-        setMusicState(showBlocked ? 'blocked' : 'paused');
         return false;
       }
     };
 
-    musicToggle?.addEventListener('click', async () => {
-      if (bgm.paused) {
-        await tryPlay(true);
-      } else {
-        bgm.pause();
-      }
-    });
-
-    bgm.addEventListener('play', () => setMusicState('playing'));
-    bgm.addEventListener('pause', () => setMusicState('paused'));
-    bgm.addEventListener('ended', () => setMusicState('paused'));
-
-    const GESTURES = ['click', 'touchstart', 'pointerdown', 'mousedown', 'keydown'];
-    const unlockOnGesture = async (event) => {
-      if (event.target?.closest?.('.music-toggle')) return;
-      if (bgm.paused) await tryPlay(true);
+    const unlockOnInteraction = async () => {
+      if (bgm.paused) await tryPlay();
       if (!bgm.paused) {
-        GESTURES.forEach(ev => document.removeEventListener(ev, unlockOnGesture));
+        INTERACTIONS.forEach(ev => document.removeEventListener(ev, unlockOnInteraction));
+        window.removeEventListener('scroll', unlockOnInteraction);
       }
     };
 
-    setMusicState('paused');
+    const INTERACTIONS = ['touchstart', 'pointerdown', 'mousedown', 'keydown', 'wheel'];
     tryPlay();
-    window.addEventListener('load', () => tryPlay(true));
-    setTimeout(() => tryPlay(true), 500);
-    GESTURES.forEach(ev => document.addEventListener(ev, unlockOnGesture, { passive: true }));
+    window.addEventListener('load', tryPlay);
+    setTimeout(tryPlay, 500);
+    window.addEventListener('scroll', unlockOnInteraction, { passive: true });
+    INTERACTIONS.forEach(ev => document.addEventListener(ev, unlockOnInteraction, { passive: true }));
   }
 
   /* ---------- Scroll-linked tilt (couple portrait only — rotating the gallery's
